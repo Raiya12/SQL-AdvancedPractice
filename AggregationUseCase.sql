@@ -176,3 +176,39 @@ ORDER BY TotalEnrollments DESC;
 	--Avoid grouping on columns with high cardinality (like unique IDs) if possible.
 	--Use materialized views or pre-aggregated tables for frequently grouped reports.
 
+----------------------------Beginner Level ----------------------------
+
+--1. Count total number of students. 
+SELECT COUNT(*) AS TotalStudents FROM Students;
+
+--2. Count total number of enrollments. 
+SELECT COUNT(*) AS TotalEnrollments FROM Enrollments;
+
+--3. Find average rating of each course. 
+SELECT CourseID, AVG(Rating) AS AverageRating FROM Enrollments GROUP BY CourseID;
+
+--4. Total number of courses per instructor. 
+SELECT InstructorID, COUNT(*) AS TotalCourses FROM Courses GROUP BY InstructorID;
+
+--5. Number of courses in each category. 
+SELECT CategoryID, COUNT(*) AS CourseCount FROM Courses GROUP BY CategoryID;
+
+--6. Number of students enrolled in each course. 
+SELECT CourseID, COUNT(StudentID) AS StudentCount FROM Enrollments GROUP BY CourseID;
+
+--7. Average course price per category. 
+SELECT CategoryID, AVG(Price) AS AveragePrice FROM Courses GROUP BY CategoryID;
+
+--8. Maximum course price. 
+SELECT MAX(Price) AS MaxCoursePrice FROM Courses;
+
+--9. Min, Max, and Avg rating per course. 
+SELECT CourseID, 
+       MIN(Rating) AS MinRating, 
+       MAX(Rating) AS MaxRating, 
+       AVG(Rating) AS AvgRating
+FROM Enrollments GROUP BY CourseID;
+
+--10. Count how many students gave rating = 5. 
+SELECT COUNT(*) AS FiveStarRatings FROM Enrollments WHERE Rating = 5;
+
