@@ -212,3 +212,62 @@ FROM Enrollments GROUP BY CourseID;
 --10. Count how many students gave rating = 5. 
 SELECT COUNT(*) AS FiveStarRatings FROM Enrollments WHERE Rating = 5;
 
+----------------------------Intermediate Level ----------------------------
+
+--1. Average completion per course. 
+SELECT CourseID, AVG(CompletionPercent) AS AvgCompletion FROM Enrollments GROUP BY CourseID;
+
+--2. Students enrolled in more than 1 course. 
+SELECT StudentID, COUNT(*) AS CourseCount FROM Enrollments GROUP BY StudentID HAVING COUNT(*) > 1;
+
+--3. Revenue per course. 
+SELECT e.CourseID, SUM(c.Price) AS TotalRevenue FROM Enrollments e JOIN Courses c ON e.CourseID = c.CourseID GROUP BY e.CourseID;
+
+--4. Instructor name + distinct students. 
+SELECT i.FullName AS InstructorName, COUNT(DISTINCT e.StudentID) AS UniqueStudents
+FROM Instructors i
+JOIN Courses c ON i.InstructorID = c.InstructorID
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY i.FullName;
+
+--5. Average enrollments per category. 
+SELECT CategoryID, AVG(EnrollCount * 1.0) AS AvgEnrollments
+FROM (
+    SELECT CategoryID, COUNT(e.EnrollmentID) AS EnrollCount
+    FROM Courses
+    JOIN Enrollments e ON Courses.CourseID = e.CourseID
+    GROUP BY Courses.CourseID, CategoryID
+) AS sub
+GROUP BY CategoryID;
+
+--6. Average course rating by instructor. 
+SELECT i.FullName AS InstructorName, AVG(e.Rating) AS AvgRating
+FROM Instructors i
+JOIN Courses c ON i.InstructorID = c.InstructorID
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY i.FullName;
+
+--7. Top 3 courses by enrollments. 
+SELECT TOP 3 CourseID, COUNT(*) AS EnrollmentCount
+FROM Enrollments
+GROUP BY CourseID
+ORDER BY EnrollmentCount DESC;
+
+--8. Average days to complete 100% (mock logic). 
+SELECT CourseID, AVG(DATEDIFF(DAY, EnrollDate, GETDATE())) AS AvgDaysToComplete
+FROM Enrollments
+WHERE CompletionPercent = 100
+GROUP BY CourseID;
+
+--9. % students who completed each course. 
+SELECT CourseID,
+       COUNT(CASE WHEN CompletionPercent = 100 THEN 1 END) * 100.0 / COUNT(*) AS CompletionRate
+FROM Enrollments
+GROUP BY CourseID;
+
+--10. Courses published per year.
+SELECT YEAR(PublishDate) AS Year, COUNT(*) AS CoursesPublished
+FROM Courses
+GROUP BY YEAR(PublishDate)
+ORDER BY Year;
+
