@@ -271,3 +271,71 @@ FROM Courses
 GROUP BY YEAR(PublishDate)
 ORDER BY Year;
 
+----------------------------Advanced Level ----------------------------
+  
+--1. Student with most completed courses. 
+SELECT TOP 1 StudentID, COUNT(*) AS CompletedCourses
+FROM Enrollments
+WHERE CompletionPercent = 100
+GROUP BY StudentID
+ORDER BY CompletedCourses DESC;
+
+--2. Instructor earnings from enrollments. 
+SELECT i.InstructorID, i.FullName, SUM(c.Price) AS TotalEarnings
+FROM Instructors i
+JOIN Courses c ON i.InstructorID = c.InstructorID
+JOIN Enrollments e ON c.CourseID = e.CourseID
+GROUP BY i.InstructorID, i.FullName;
+
+--3. Category avg rating (≥ 4). 
+SELECT c.CategoryID, AVG(e.Rating) AS AvgRating
+FROM Enrollments e
+JOIN Courses c ON e.CourseID = c.CourseID
+GROUP BY c.CategoryID
+HAVING AVG(e.Rating) >= 4;
+
+--4. Students rated below 3 more than once. 
+SELECT StudentID, COUNT(*) AS LowRatings
+FROM Enrollments
+WHERE Rating < 3
+GROUP BY StudentID
+HAVING COUNT(*) > 1;
+
+--5. Course with lowest average completion. 
+SELECT TOP 1 CourseID, AVG(CompletionPercent) AS AvgCompletion
+FROM Enrollments
+GROUP BY CourseID
+ORDER BY AvgCompletion ASC;
+
+--6. Students enrolled in all courses by instructor 1.
+-- Step 1: Total number of courses by Instructor 1
+WITH InstructorCourses AS (
+    SELECT CourseID
+    FROM Courses
+    WHERE InstructorID = 1
+),
+StudentCourseCounts AS (
+    SELECT e.StudentID, COUNT(DISTINCT e.CourseID) AS EnrolledInCourses
+    FROM Enrollments e
+    JOIN InstructorCourses ic ON e.CourseID = ic.CourseID
+    GROUP BY e.StudentID
+),
+CourseTotal AS (
+    SELECT COUNT(*) AS TotalCourses FROM InstructorCourses
+)
+SELECT s.StudentID
+FROM StudentCourseCounts s, CourseTotal ct
+WHERE s.EnrolledInCourses = ct.TotalCourses;
+
+--7. Duplicate ratings check. 
+SELECT StudentID, CourseID, COUNT(*) AS RatingCount
+FROM Enrollments
+GROUP BY StudentID, CourseID
+HAVING COUNT(*) > 1;
+
+--8. Category with highest avg rating.
+SELECT TOP 1 c.CategoryID, AVG(e.Rating) AS AvgRating
+FROM Enrollments e
+JOIN Courses c ON e.CourseID = c.CourseID
+GROUP BY c.CategoryID
+ORDER BY AvgRating DESC;
